@@ -20,6 +20,7 @@ env:
   NODE_ENV: "test"
   NPM_CONFIG_PROGRESS: ${{ false }}
   COZY_DESKTOP_HEARTBEAT: ${{ 1000 }}
+  DISPLAY: ":99.0"
 
 jobs:
   linux:
@@ -45,15 +46,17 @@ jobs:
       - name: Create a local instance and an OAuth client
         run: |
           mkdir -p "$COZY_STACK_STORAGE"
-          (cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &);
+          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
           sleep 1
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-          export COZY_CLIENT_ID=$($cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
+          export COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
           export COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
       - name: Create dummy .env.test file
         run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
         run: yarn install:all
+      - name: Start Xvfb
+        run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
       - name: Build elm
         run: yarn build:elm
       - name: Lint
