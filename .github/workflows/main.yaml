@@ -49,8 +49,8 @@ jobs:
           cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
           sleep 1
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-          export COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
-          export COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
+          echo "COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)" >> $GITHUB_ENV
+          echo "COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)" >> $GITHUB_ENV
       - name: Create dummy .env.test file
         run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
