@@ -36,8 +36,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      - name: Install dependencies
-        run: yarn install:all
       - name: Setup CouchDB
         uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
         with:
@@ -54,8 +52,16 @@ jobs:
           export COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
       - name: Create dummy .env.test file
         run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
+      - name: Install dependencies
+        run: yarn install:all
+      - name: Build elm
+        run: yarn build:elm
       - name: Lint
         run: yarn lint
+      - name: Elm tests
+        run: yarn test:elm
+      - name: World tests
+        run: yarn test:world
       - name: Unit tests
         run: yarn test:unit
       - name: Integration tests
@@ -63,4 +69,4 @@ jobs:
       - name: Scenarios
         run: yarn test:scenarios
       - name: Build package
-        run: yarn dist
+        run: yarn dist:all
