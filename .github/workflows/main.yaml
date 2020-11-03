@@ -53,7 +53,7 @@ jobs:
           export COZY_CLIENT_ID=$($cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
           export COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
       - name: Create dummy .env.test file
-        run: echo "NODE_ENV=test" > "${TRAVIS_BUILD_DIR}/.env.test"
+        run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Lint
         run: yarn lint
       - name: Unit tests
