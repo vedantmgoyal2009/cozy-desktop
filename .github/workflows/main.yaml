@@ -42,6 +42,8 @@ jobs:
         uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
         with:
           couchdb version: '2.3.1'
+      - name: Download cozy-stack
+        run: go get github.com/cozy/cozy-stack
       - name: Create a local instance and an OAuth client
         run: |
           mkdir -p "$COZY_STACK_STORAGE"
