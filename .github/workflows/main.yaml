@@ -11,7 +11,6 @@ env:
   COZY_URL: "http://localhost:8080"
   COZY_PASSPHRASE: "cozy"
   COZY_STACK_STORAGE: "${{ env.HOME }}/storage"
-  GOPATH: ${{ env.HOME }}
   GOPROXY: "https://proxy.golang.org"
   GO111MODULE: "on"
   # FIXME: Homebrew 1.7.3 fails to install cask apache-couchdb
@@ -46,11 +45,11 @@ jobs:
       - name: Create a local instance and an OAuth client
         run: |
           mkdir -p "$COZY_STACK_STORAGE"
-          ($GOPATH/bin/cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &);
+          (cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &);
           sleep 1
-          $GOPATH/bin/cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-          export COZY_CLIENT_ID=$($GOPATH/bin/cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
-          export COZY_STACK_TOKEN=$($GOPATH/bin/cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
+          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+          export COZY_CLIENT_ID=$($cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
+          export COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
       - name: Create dummy .env.test file
         run: echo "NODE_ENV=test" > "${TRAVIS_BUILD_DIR}/.env.test"
       - name: Lint
