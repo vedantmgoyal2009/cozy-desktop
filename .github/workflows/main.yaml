@@ -104,10 +104,7 @@ jobs:
           go-version: '1.14'
       - name: Setup CouchDB
         run: |
-          wget https://dl.bintray.com/apache/couchdb/mac/2.3.1/Apache-CouchDB-2.3.1.zip
-          unzip Apache-CouchDB-2.3.1.zip
-          mv "Apache CouchDB.app" /Applications/
-          #travis_retry brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/master/Casks/apache-couchdb.rb;
+          brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/92914bcfc1f90d7e298cb2f2c26d61c3ce16ae1e/Casks/apache-couchdb.rb # v2.3.1
           printf "\n[log]\nlevel = warn\n" >> /Applications/Apache\ CouchDB.app/Contents/Resources/couchdbx-core/etc/local.ini;
           ulimit -S -n 1024;
           /Applications/Apache\ CouchDB.app/Contents/Resources/couchdbx-core/bin/couchdb >couchdb.log 2>&1 &
