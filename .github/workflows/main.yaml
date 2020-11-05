@@ -7,10 +7,8 @@ on:
   pull_request:
 
 env:
-  COZY_DESKTOP_DIR: "${{ runner.temp }}/cozy-desktop"
   COZY_URL: "http://localhost:8080"
   COZY_PASSPHRASE: "cozy"
-  COZY_STACK_STORAGE: "${{ github.workspace }}/storage"
   GOPROXY: "https://proxy.golang.org"
   GO111MODULE: "on"
   # FIXME: Homebrew 1.7.3 fails to install cask apache-couchdb
@@ -26,6 +24,9 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     name: Linux
+    env:
+      COZY_DESKTOP_DIR: "${{ runner.temp }}/cozy-desktop"
+      COZY_STACK_STORAGE: "${{ runner.temp }}/storage"
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -93,6 +94,9 @@ jobs:
   macos:
     runs-on: macos-latest
     name: macOS
+    env:
+      COZY_DESKTOP_DIR: "${{ runner.temp }}/cozy-desktop"
+      COZY_STACK_STORAGE: "${{ runner.temp }}/storage"
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
