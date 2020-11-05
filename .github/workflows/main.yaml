@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  COZY_DESKTOP_DIR: "/tmp/cozy-desktop"
+  COZY_DESKTOP_DIR: "${{ runner.temp }}/cozy-desktop"
   COZY_URL: "http://localhost:8080"
   COZY_PASSPHRASE: "cozy"
   COZY_STACK_STORAGE: "${{ github.workspace }}/storage"
@@ -54,6 +54,8 @@ jobs:
           # Variables are not directly available in next steps; we need to write them into a special file
           echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
           echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
+      - name: Create local synchronization dir
+        run: mkdir -p "$COZY_DESKTOP_DIR"
       - name: Create dummy .env.test file
         run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
@@ -125,6 +127,10 @@ jobs:
           # Variables are not directly available in next steps; we need to write them into a special file
           echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
           echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
+      - name: Create local synchronization dir
+        run: |
+          hdiutil create -megabytes 50 -fs "$COZY_DESKTOP_FS" -volname cozy-desktop "$COZY_DESKTOP_DIR"
+          hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
       - name: Create dummy .env.test file
         run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
