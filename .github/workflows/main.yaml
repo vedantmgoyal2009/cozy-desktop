@@ -103,9 +103,16 @@ jobs:
         with:
           go-version: '1.14'
       - name: Setup CouchDB
-        uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
-        with:
-          couchdb version: '2.3.1'
+        run: |
+          wget https://dl.bintray.com/apache/couchdb/mac/2.3.1/Apache-CouchDB-2.3.1.zip
+          unzip Apache-CouchDB-2.3.1.zip
+          mv "Apache CouchDB.app" /Applications/
+          #travis_retry brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/master/Casks/apache-couchdb.rb;
+          printf "\n[log]\nlevel = warn\n" >> /Applications/Apache\ CouchDB.app/Contents/Resources/couchdbx-core/etc/local.ini;
+          ulimit -S -n 1024;
+          /Applications/Apache\ CouchDB.app/Contents/Resources/couchdbx-core/bin/couchdb >couchdb.log 2>&1 &
+          sleep 8
+          curl -X PUT http://127.0.0.1:5984/{_users,_replicator,_global_changes}
       - name: Install imagemagick
         run: brew install imagemagick;
       - name: Download cozy-stack
