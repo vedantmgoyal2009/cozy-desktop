@@ -87,3 +87,59 @@ jobs:
             -v ~/.cache/electron-builder:/root/.cache/electron-builder \
             electronuserland/builder:12 \
             /bin/bash -c "yarn dist:all"
+
+  macos:
+    runs-on: macos-latest
+    name: macOS
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12.14.1'
+          check-latest: true
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.14'
+      - name: Setup CouchDB
+        uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
+        with:
+          couchdb version: '2.3.1'
+      - name: Install imagemagick
+        run: brew install imagemagick;
+      - name: Download cozy-stack
+        run: go get github.com/cozy/cozy-stack
+      - name: Create a local instance and an OAuth client
+        run: |
+          mkdir -p "$COZY_STACK_STORAGE"
+          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
+          sleep 1
+          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+          COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
+          COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
+          # Variables are not directly available in next steps; we need to write them into a special file
+          echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
+          echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
+      - name: Create dummy .env.test file
+        run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
+      - name: Install dependencies
+        run: yarn install:all
+      - name: Start Xvfb
+        run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
+      - name: Build elm
+        run: yarn build:elm
+      - name: Lint
+        run: yarn lint
+      - name: Elm tests
+        run: yarn test:elm
+      - name: World tests
+        run: yarn test:world
+      - name: Unit tests
+        run: yarn test:unit
+      - name: Integration tests
+        run: yarn test:integration
+      - name: Scenarios
+        run: yarn test:scenarios
+      - name: Build package
+        run: yarn dist:all
