@@ -128,6 +128,8 @@ jobs:
           echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
           echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
       - name: Create local synchronization dir
+        env:
+            COZY_DESKTOP_FS: APFS
         run: |
           hdiutil create -megabytes 50 -fs "$COZY_DESKTOP_FS" -volname cozy-desktop "$COZY_DESKTOP_DIR"
           hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
