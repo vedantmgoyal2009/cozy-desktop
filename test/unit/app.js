@@ -46,7 +46,7 @@ describe('App', function() {
     beforeEach(configHelpers.createConfig)
 
     // FIXME
-    if (process.env.TRAVIS) {
+    if (process.env.TRAVIS || process.env.GITHUB_ENV) {
       it('does not work on Travis')
       return
     }
