@@ -45,40 +45,15 @@ jobs:
         uses: ./.github/actions/setup-couchdb
         with:
           couchdb-version: '2.3.1'
-      - name: Download cozy-stack
-        run: go get github.com/cozy/cozy-stack
-      - name: Create cozy-stack storage
-        run: |
-          # Install podman-machine
-          # Install sshfs
-          brew cask install osxfuse
-          curl -L https://github.com/osxfuse/sshfs/releases/download/osxfuse-sshfs-2.5.0/sshfs-2.5.0.pkg --output sshfs-2.5.0.pkg
-          sudo installer -pkg ./sshfs-2.5.0.pkg -target /
-          # Create linux VM and mount storage folder
-          mkdir -p "$COZY_STACK_STORAGE"
-          podman-machine ssh box -- mkdir /home/tc/storage
-          podman-machine mount box:/home/tc/storage $COZY_STACK_STORAGE
-      - name: Start cozy-stack server
-        run: |
-          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" >cozy-stack.log 2>&1 &
-      - name: Create local instance and OAuth client
-        run: |
-          sleep 1
-          # echo "127.0.0.1 localhost cozy.tools" | sudo tee -a /etc/hosts
-          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-          COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
-          COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
-          # Variables are not directly available in next steps; we need to write them into a special file
-          echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
-          echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
-      - name: Create local synchronization dir
+      - name: Setup cozy-stack
+        uses: ./.github/actions/setup-cozy-stack
+      - name: Setup local env
         env:
             COZY_DESKTOP_FS: APFS
         run: |
           hdiutil create -megabytes 50 -fs "$COZY_DESKTOP_FS" -volname cozy-desktop "$COZY_DESKTOP_DIR"
           hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
-      - name: Create dummy .env.test file
-        run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
+          echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
         run: yarn install:all
       - name: Start Xvfb

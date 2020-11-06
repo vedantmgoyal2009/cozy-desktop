@@ -44,6 +44,10 @@ jobs:
             couchdb version: '2.3.1'
       - name: Setup cozy-stack
         uses: ./.github/actions/setup-cozy-stack
+      - name: Setup local env
+        run: |
+          mkdir -p "$COZY_DESKTOP_DIR"
+          echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
         run: yarn install:all
       - name: Start Xvfb
@@ -79,6 +83,10 @@ jobs:
             couchdb version: '2.3.1'
       - name: Setup cozy-stack
         uses: ./.github/actions/setup-cozy-stack
+      - name: Setup local env
+        run: |
+          mkdir -p "$COZY_DESKTOP_DIR"
+          echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
         run: yarn install:all
       - name: Start Xvfb
@@ -106,6 +114,10 @@ jobs:
             couchdb version: '2.3.1'
       - name: Setup cozy-stack
         uses: ./.github/actions/setup-cozy-stack
+      - name: Setup local env
+        run: |
+          mkdir -p "$COZY_DESKTOP_DIR"
+          echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
         run: yarn install:all
       - name: Start Xvfb
