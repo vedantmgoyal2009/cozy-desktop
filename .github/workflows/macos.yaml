@@ -42,16 +42,9 @@ jobs:
         with:
           go-version: '1.14'
       - name: Setup podman
-        run: |
-          curl -L https://github.com/boot2podman/machine/releases/download/v0.17/podman-machine.darwin-amd64 --output /usr/local/bin/podman-machine
-          chmod +x /usr/local/bin/podman-machine
-          podman-machine create box
-      - name: Setup CouchDB
-        run: |
-          podman-machine ssh box -L 5984:localhost:5984 -N &
-          podman-machine ssh box -- sudo podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
-        #- name: Install imagemagick
-        #  run: brew install imagemagick;
+        uses: ./.github/actions/setup-couchdb
+        with:
+          couchdb-version: '2.3.1'
       - name: Download cozy-stack
         run: go get github.com/cozy/cozy-stack
       - name: Create cozy-stack storage
