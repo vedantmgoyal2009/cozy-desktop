@@ -5,11 +5,11 @@ inputs:
   cozy-stack-storage:
     description: 'The folder location where the remote cozy-stack files will be stored'
     required: false
-    default: ${{ $COZY_STACK_STORAGE }}
+    default: "${{ $COZY_STACK_STORAGE }}"
   cozy-passphrase:
     description: 'The user passphrase of the created Cozy instance'
     required: false
-    default: ${{ $COZY_PASSPHRASE }}
+    default: "${{ $COZY_PASSPHRASE }}"
 runs:
   using: composite
   steps:
