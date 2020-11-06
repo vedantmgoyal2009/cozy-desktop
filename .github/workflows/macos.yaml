@@ -43,7 +43,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      - name: Setup podman
+      - name: Setup CouchDB
         uses: ./.github/actions/setup-couchdb
         with:
           couchdb-version: '2.3.1'
@@ -80,7 +80,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      - name: Setup podman
+      - name: Setup CouchDB
         uses: ./.github/actions/setup-couchdb
         with:
           couchdb-version: '2.3.1'
@@ -117,7 +117,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      - name: Setup podman
+      - name: Setup CouchDB
         uses: ./.github/actions/setup-couchdb
         with:
           couchdb-version: '2.3.1'

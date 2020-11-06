@@ -5,11 +5,9 @@ inputs:
   cozy-stack-storage:
     description: 'The folder location where the remote cozy-stack files will be stored'
     required: false
-    default: "${{ $COZY_STACK_STORAGE }}"
   cozy-passphrase:
     description: 'The user passphrase of the created Cozy instance'
     required: false
-    default: "${{ $COZY_PASSPHRASE }}"
 runs:
   using: composite
   steps:
@@ -17,10 +15,20 @@ runs:
       shell: bash
       run: go get github.com/cozy/cozy-stack
 
+    - name: Set env variables
+      shell: bash
+      run: |
+        if [[ -z $COZY_STACK_STORAGE ]]; then
+          echo "COZY_STACK_STORAGE=${{ inputs.cozy-stack-storage }}" >> $GITHUB_ENV
+        fi
+        if [[ -z $COZY_PASSPHRASE ]]; then
+          echo "COZY_PASSPHRASE=${{ inputs.cozy-passphrase }}" >> $GITHUB_ENV
+        fi
+
     - name: Create cozy-stack storage
       shell: bash
       run: |
-        mkdir -p "$INPUT_COZY-STACK-STORAGE"
+        mkdir -p $COZY_STACK_STORAGE
 
         if [[ ${{ runner.os }} == "osx" ]]; then
           brew cask install osxfuse
@@ -33,9 +41,9 @@ runs:
     - name: Create a local instance and an OAuth client
       shell: bash
       run: |
-        cozy-stack serve --fs-url "file://$INPUT_COZY-STACK-STORAGE" --log-level warning >cozy-stack.log 2>&1 &
+        cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
         sleep 1
-        cozy-stack instances add --dev --passphrase "$INPUT_COZY-PASSPHRASE" localhost:8080
+        cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
         COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
         COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
         # Variables are not directly available in next steps; we need to write them into a special file

@@ -18,9 +18,10 @@ runs:
         curl -L https://github.com/boot2podman/machine/releases/download/v0.17/podman-machine.darwin-amd64 --output /usr/local/bin/podman-machine
         chmod +x /usr/local/bin/podman-machine
         podman-machine create box
+
     - name: Setup CouchDB
       shell: bash
       run: |
-        podman-machine ssh box -L "$INPUT_COUCHDB-PORT:localhost:5984" -N &
-        podman-machine ssh box -- sudo podman run -d -p 5984:5984 --name couch "apache/couchdb:$INPUT_COUCHDB-VERSION"
-        curl -X PUT "http://127.0.0.1:$INPUT_COUCHDB-PORT/{_users,_replicator,_global_changes}"
+        podman-machine ssh box -L ${{ inputs.couchdb-port }}:localhost:5984 -N &
+        podman-machine ssh box -- sudo podman run -d -p 5984:5984 --name couch "apache/couchdb:${{ inputs.couchdb-version }}"
+        curl -X PUT "http://127.0.0.1:${{ inputs.couchdb-port }}/{_users,_replicator,_global_changes}"
