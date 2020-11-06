@@ -23,5 +23,6 @@ runs:
       shell: bash
       run: |
         podman-machine ssh box -L ${{ inputs.couchdb-port }}:localhost:5984 -N &
-        podman-machine ssh box -- sudo podman run -d -p 5984:5984 --name couch "apache/couchdb:${{ inputs.couchdb-version }}"
-        curl -X PUT "http://localhost:${{ inputs.couchdb-port }}/{_users,_replicator,_global_changes}"
+        podman-machine ssh box -- sudo podman run -d -p 5984:5984 --name couch apache/couchdb:${{ inputs.couchdb-version }}
+        sleep 5
+        curl -X PUT http://localhost:${{ inputs.couchdb-port }}/{_users,_replicator,_global_changes}
