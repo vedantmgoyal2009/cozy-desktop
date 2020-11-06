@@ -114,8 +114,8 @@ jobs:
         uses: mxschmitt/action-tmate@v3
       - name: Setup CouchDB
         run: podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
-      - name: Install imagemagick
-        run: brew install imagemagick;
+        #- name: Install imagemagick
+        #  run: brew install imagemagick;
       - name: Download cozy-stack
         run: go get github.com/cozy/cozy-stack
       - name: Create cozy-stack storage
