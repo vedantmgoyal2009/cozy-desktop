@@ -133,30 +133,13 @@ jobs:
       - name: Start cozy-stack server
         run: |
           cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" >cozy-stack.log 2>&1 &
-      - name: Create a local instance
-        id: create-instance
-        continue-on-error: true
+          #- name: Debug with tmate
+          #  uses: mxschmitt/action-tmate@v3
+      - name: Create local instance and OAuth client
         run: |
-          sleep 8
-          echo "127.0.0.1 localhost cozy.tools" | sudo tee -a /etc/hosts
+          sleep 1
+          # echo "127.0.0.1 localhost cozy.tools" | sudo tee -a /etc/hosts
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-      - name: Retry creating local instance
-        id: create-instance-retry1
-        continue-on-error: true
-        if: steps.create-instance.outcome=='failure'
-        run: |
-          sleep 30
-          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-      - name: Retry creating local instance
-        continue-on-error: true
-        if: steps.create-instance-retry1.outcome=='failure'
-        run: |
-          sleep 60
-          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-      - name: Debug with tmate
-        uses: mxschmitt/action-tmate@v3
-      - name: Create an OAuth client
-        run: |
           COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
           COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
           # Variables are not directly available in next steps; we need to write them into a special file
