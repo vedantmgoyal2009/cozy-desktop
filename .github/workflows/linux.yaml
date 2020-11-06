@@ -1,0 +1,135 @@
+name: Linux
+
+# To debug a job, add the following step:
+# - name: Debug with tmate
+#   uses: mxschmitt/action-tmate@v3
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  COZY_DESKTOP_DIR: "${{ github.workspace }}/cozy-desktop"
+  COZY_STACK_STORAGE: "${{ github.workspace }}/storage"
+  COZY_URL: "http://localhost:8080"
+  COZY_PASSPHRASE: "cozy"
+  GOPROXY: "https://proxy.golang.org"
+  GO111MODULE: "on"
+  # FIXME: Homebrew 1.7.3 fails to install cask apache-couchdb
+  NO_BREAKPOINTS: ${{ 1 }}
+  NODE_ENV: "test"
+  COZY_DESKTOP_HEARTBEAT: ${{ 1000 }}
+  DISPLAY: ":99.0"
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    name: Linux - Lint & Unit tests
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+        with:
+            node-version: '12.14.1'
+            check-latest: true
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+            go-version: '1.14'
+      - name: Setup CouchDB
+        uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
+        with:
+            couchdb version: '2.3.1'
+      - name: Setup cozy-stack
+        uses: ./.github/actions/setup-cozy-stack
+      - name: Install dependencies
+        run: yarn install:all
+      - name: Start Xvfb
+        run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
+      - name: Build elm
+        run: yarn build:elm
+      - name: Lint
+        run: yarn lint
+      - name: Elm tests
+        run: yarn test:elm
+      - name: World tests
+        run: yarn test:world
+      - name: Unit tests
+        run: yarn test:unit
+
+  integration:
+    runs-on: ubuntu-latest
+    name: Linux - Integration tests
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+        with:
+            node-version: '12.14.1'
+            check-latest: true
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+            go-version: '1.14'
+      - name: Setup CouchDB
+        uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
+        with:
+            couchdb version: '2.3.1'
+      - name: Setup cozy-stack
+        uses: ./.github/actions/setup-cozy-stack
+      - name: Install dependencies
+        run: yarn install:all
+      - name: Start Xvfb
+        run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
+      - name: Integration tests
+        run: yarn test:integration
+
+  scenarios:
+    runs-on: ubuntu-latest
+    name: Linux - Scenarios
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+        with:
+            node-version: '12.14.1'
+            check-latest: true
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+            go-version: '1.14'
+      - name: Setup CouchDB
+        uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
+        with:
+            couchdb version: '2.3.1'
+      - name: Setup cozy-stack
+        uses: ./.github/actions/setup-cozy-stack
+      - name: Install dependencies
+        run: yarn install:all
+      - name: Start Xvfb
+        run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
+      - name: Scenarios
+        run: yarn test:scenarios
+
+  build:
+    runs-on: ubuntu-latest
+    name: Linux - Build packages
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: yarn install:all
+      - name: Build packages
+        run: |
+          docker run --rm \
+            $(env | \
+              grep -Eo '^[^\s=]*(DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|GITHUB_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_)[^\s=]*' | \
+              sed 's/^/-e /;/^$/d' | \
+              paste -sd ' ' \
+            ) \
+            -v ${PWD}:/project \
+            -v ~/.cache/electron:/root/.cache/electron \
+            -v ~/.cache/electron-builder:/root/.cache/electron-builder \
+            electronuserland/builder:12 \
+            /bin/bash -c "yarn dist:all"

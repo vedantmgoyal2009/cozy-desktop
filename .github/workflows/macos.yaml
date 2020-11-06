@@ -1,4 +1,9 @@
+
 name: Lint, test and package Cozy Desktop
+
+# To debug a job, add the following step:
+# - name: Debug with tmate
+#   uses: mxschmitt/action-tmate@v3
 
 on:
   push:
@@ -15,7 +20,6 @@ env:
   GO111MODULE: "on"
   # FIXME: Homebrew 1.7.3 fails to install cask apache-couchdb
   HOMEBREW_NO_AUTO_UPDATE: ${{ 1 }}
-  MOCHA_TIMEOUT: ${{ 240000 }}
   NO_BREAKPOINTS: ${{ 1 }}
   NODE_ENV: "test"
   NPM_CONFIG_PROGRESS: ${{ false }}
@@ -23,79 +27,6 @@ env:
   DISPLAY: ":99.0"
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
-    name: Linux
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v2-beta
-        with:
-          node-version: '12.14.1'
-          check-latest: true
-      - name: Setup golang
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.14'
-      - name: Setup CouchDB
-        uses: 'cobot/couchdb-action@11e2c9f532a0eee2516ff80d92990d8081f2792c' # v4
-        with:
-          couchdb version: '2.3.1'
-      - name: Download cozy-stack
-        run: go get github.com/cozy/cozy-stack
-      - name: Create a local instance and an OAuth client
-        run: |
-          mkdir -p "$COZY_STACK_STORAGE"
-          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
-          sleep 1
-          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-          COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
-          COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
-          # Variables are not directly available in next steps; we need to write them into a special file
-          echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
-          echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
-      - name: Create local synchronization dir
-        run: mkdir -p "$COZY_DESKTOP_DIR"
-      - name: Create dummy .env.test file
-        run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
-      - name: Install dependencies
-        run: yarn install:all
-      - name: Start Xvfb
-        run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
-      - name: Build elm
-        run: yarn build:elm
-      - name: Lint
-        continue-on-error: true
-        run: yarn lint
-      - name: Elm tests
-        continue-on-error: true
-        run: yarn test:elm
-      - name: World tests
-        continue-on-error: true
-        run: yarn test:world
-      - name: Unit tests
-        continue-on-error: true
-        run: yarn test:unit
-      - name: Integration tests
-        continue-on-error: true
-        run: yarn test:integration
-      - name: Scenarios
-        continue-on-error: true
-        run: yarn test:scenarios
-      - name: Build package
-        run: |
-          docker run --rm \
-            $(env | \
-              grep -Eo '^[^\s=]*(DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|GITHUB_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_)[^\s=]*' | \
-              sed 's/^/-e /;/^$/d' | \
-              paste -sd ' ' \
-            ) \
-            -v ${PWD}:/project \
-            -v ~/.cache/electron:/root/.cache/electron \
-            -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-            electronuserland/builder:12 \
-            /bin/bash -c "yarn dist:all"
-
   macos:
     runs-on: macos-latest
     name: macOS
@@ -110,8 +41,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      - name: Debug with tmate
-        uses: mxschmitt/action-tmate@v3
       - name: Setup CouchDB
         run: podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
         #- name: Install imagemagick
@@ -173,20 +102,3 @@ jobs:
         run: yarn test:scenarios
       - name: Build package
         run: yarn dist:all
-
-  windows:
-    runs-on: windows-latest
-    name: Windows
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v2-beta
-        with:
-          node-version: '12.14.1'
-          check-latest: true
-      - name: Setup golang
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.14'
-      - name: Debug with tmate
-        uses: mxschmitt/action-tmate@v3
