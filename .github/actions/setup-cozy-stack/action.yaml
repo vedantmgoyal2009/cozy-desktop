@@ -3,6 +3,7 @@ author: Erwan Guyader
 description: Downloads cozy-stack, starts it and create a test instance.
 runs:
   using: composite
+  shell: bash
   steps:
     - name: Download cozy-stack
       run: go get github.com/cozy/cozy-stack
