@@ -11,6 +11,7 @@ env:
   COZY_STACK_STORAGE: "${{ github.workspace }}/storage"
   COZY_URL: "http://localhost:8080"
   COZY_PASSPHRASE: "cozy"
+  COZY_ADMIN_HOST: "127.0.0.1"
   GOPROXY: "https://proxy.golang.org"
   GO111MODULE: "on"
   # FIXME: Homebrew 1.7.3 fails to install cask apache-couchdb
