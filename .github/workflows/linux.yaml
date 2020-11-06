@@ -130,6 +130,11 @@ jobs:
     name: Build packages
     steps:
       - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12.14.1'
+          check-latest: true
       - name: Install dependencies
         run: yarn install:all
       - name: Build packages
