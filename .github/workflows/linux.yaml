@@ -26,7 +26,7 @@ env:
 jobs:
   unit:
     runs-on: ubuntu-latest
-    name: Linux - Lint & Unit tests
+    name: Lint & Unit tests
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -61,7 +61,7 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
-    name: Linux - Integration tests
+    name: Integration tests
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -88,7 +88,7 @@ jobs:
 
   scenarios:
     runs-on: ubuntu-latest
-    name: Linux - Scenarios
+    name: Scenarios
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -115,7 +115,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    name: Linux - Build packages
+    name: Build packages
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies

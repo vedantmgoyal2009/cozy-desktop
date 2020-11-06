@@ -1,5 +1,5 @@
 
-name: Lint, test and package Cozy Desktop
+name: macOS
 
 # To debug a job, add the following step:
 # - name: Debug with tmate

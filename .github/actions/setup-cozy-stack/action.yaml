@@ -3,11 +3,12 @@ author: Erwan Guyader
 description: Downloads cozy-stack, starts it and create a test instance.
 runs:
   using: composite
-  shell: bash
   steps:
     - name: Download cozy-stack
+      shell: bash
       run: go get github.com/cozy/cozy-stack
     - name: Create a local instance and an OAuth client
+      shell: bash
       run: |
         mkdir -p "$COZY_STACK_STORAGE"
         cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
@@ -19,6 +20,8 @@ runs:
         echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
         echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
     - name: Create local synchronization dir
+      shell: bash
       run: mkdir -p "$COZY_DESKTOP_DIR"
     - name: Create dummy .env.test file
+      shell: bash
       run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
