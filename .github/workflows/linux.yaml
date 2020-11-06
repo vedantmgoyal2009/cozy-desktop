@@ -9,7 +9,8 @@ on:
     branches:
       - main
   pull_request:
-
+    paths-ignore:
+      - '.github/workflows/macos.yaml'
 env:
   COZY_DESKTOP_DIR: "${{ github.workspace }}/cozy-desktop"
   COZY_STACK_STORAGE: "${{ github.workspace }}/storage"

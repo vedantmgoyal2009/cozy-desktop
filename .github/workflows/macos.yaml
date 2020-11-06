@@ -9,6 +9,8 @@ on:
     branches:
       - main
   pull_request:
+    paths-ignore:
+      - '.github/workflows/linux.yaml'
 
 env:
   COZY_DESKTOP_DIR: "${{ github.workspace }}/cozy-desktop"
