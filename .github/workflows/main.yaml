@@ -104,8 +104,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      #- name: Debug with tmate
-      #  uses: mxschmitt/action-tmate@v3
       - name: Setup CouchDB
         run: |
           brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/92914bcfc1f90d7e298cb2f2c26d61c3ce16ae1e/Casks/apache-couchdb.rb # v2.3.1
@@ -134,7 +132,7 @@ jobs:
           podman-machine mount box:/storage $COZY_STACK_STORAGE
       - name: Start cozy-stack server
         run: |
-          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
+          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" >cozy-stack.log 2>&1 &
       - name: Create a local instance
         id: create-instance
         continue-on-error: true
@@ -149,10 +147,13 @@ jobs:
           sleep 30
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
       - name: Retry creating local instance
+        continue-on-error: true
         if: steps.create-instance-retry1.outcome=='failure'
         run: |
           sleep 60
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+      - name: Debug with tmate
+        uses: mxschmitt/action-tmate@v3
       - name: Create an OAuth client
         run: |
           COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
