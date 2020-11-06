@@ -41,8 +41,15 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
+      - name: Setup podman
+        run: |
+          curl -L https://github.com/boot2podman/machine/releases/download/v0.17/podman-machine.darwin-amd64 --output /usr/local/bin/podman-machine
+          chmod +x /usr/local/bin/podman-machine
+          podman-machine create box
       - name: Setup CouchDB
-        run: podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
+        run: |
+          podman-machine ssh box -L 5984:localhost:5984 -N &
+          podman-machine ssh box - sudo podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
         #- name: Install imagemagick
         #  run: brew install imagemagick;
       - name: Download cozy-stack
@@ -50,15 +57,12 @@ jobs:
       - name: Create cozy-stack storage
         run: |
           # Install podman-machine
-          curl -L https://github.com/boot2podman/machine/releases/download/v0.17/podman-machine.darwin-amd64 --output /usr/local/bin/podman-machine
-          chmod +x /usr/local/bin/podman-machine
           # Install sshfs
           brew cask install osxfuse
           curl -L https://github.com/osxfuse/sshfs/releases/download/osxfuse-sshfs-2.5.0/sshfs-2.5.0.pkg --output sshfs-2.5.0.pkg
           sudo installer -pkg ./sshfs-2.5.0.pkg -target /
           # Create linux VM and mount storage folder
           mkdir -p "$COZY_STACK_STORAGE"
-          podman-machine create box
           podman-machine ssh box -- mkdir /home/tc/storage
           podman-machine mount box:/home/tc/storage $COZY_STACK_STORAGE
       - name: Start cozy-stack server
