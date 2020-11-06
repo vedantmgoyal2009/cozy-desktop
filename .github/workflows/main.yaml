@@ -128,8 +128,8 @@ jobs:
           # Create linux VM and mount storage folder
           mkdir -p "$COZY_STACK_STORAGE"
           podman-machine create box
-          podman-machine ssh box -- sudo mkdir /storage
-          podman-machine mount box:/storage $COZY_STACK_STORAGE
+          podman-machine ssh box -- mkdir /home/tc/storage
+          podman-machine mount box:/home/tc/storage $COZY_STACK_STORAGE
       - name: Start cozy-stack server
         run: |
           cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" >cozy-stack.log 2>&1 &
