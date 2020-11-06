@@ -49,7 +49,7 @@ jobs:
       - name: Setup CouchDB
         run: |
           podman-machine ssh box -L 5984:localhost:5984 -N &
-          podman-machine ssh box - sudo podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
+          podman-machine ssh box -- sudo podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
         #- name: Install imagemagick
         #  run: brew install imagemagick;
       - name: Download cozy-stack
