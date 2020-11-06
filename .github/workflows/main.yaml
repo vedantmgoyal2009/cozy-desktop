@@ -104,6 +104,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
+      - name: Debug with tmate
+        uses: mxschmitt/action-tmate@v3
       - name: Setup CouchDB
         run: |
           brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/92914bcfc1f90d7e298cb2f2c26d61c3ce16ae1e/Casks/apache-couchdb.rb # v2.3.1
@@ -118,27 +120,23 @@ jobs:
         run: go get github.com/cozy/cozy-stack
       - name: Create a local instance and an OAuth client
         run: |
-            brew install docker-compose
-            docker-compose up -d
-            sleep 8
-            yarn test:setup
-            #mkdir -p "$COZY_STACK_STORAGE"
-            #cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
-            #sleep 8
-            #cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
-            #COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
-            #COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
-            ## Variables are not directly available in next steps; we need to write them into a special file
-            #echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
-            #echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
+          mkdir -p "$COZY_STACK_STORAGE"
+          cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
+          sleep 8
+          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+          COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
+          COZY_STACK_TOKEN=$(cozy-stack instances token-oauth localhost:8080 "$COZY_CLIENT_ID" io.cozy.files io.cozy.settings)
+          # Variables are not directly available in next steps; we need to write them into a special file
+          echo "COZY_CLIENT_ID=$COZY_CLIENT_ID" >> $GITHUB_ENV
+          echo "COZY_STACK_TOKEN=$COZY_STACK_TOKEN" >> $GITHUB_ENV
       - name: Create local synchronization dir
         env:
             COZY_DESKTOP_FS: APFS
         run: |
           hdiutil create -megabytes 50 -fs "$COZY_DESKTOP_FS" -volname cozy-desktop "$COZY_DESKTOP_DIR"
           hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
-          #- name: Create dummy .env.test file
-          #  run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
+      - name: Create dummy .env.test file
+        run: echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
         run: yarn install:all
       - name: Start Xvfb
