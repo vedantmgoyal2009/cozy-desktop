@@ -104,8 +104,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
-      - name: Debug with tmate
-        uses: mxschmitt/action-tmate@v3
+      #- name: Debug with tmate
+      #  uses: mxschmitt/action-tmate@v3
       - name: Setup CouchDB
         run: |
           brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/92914bcfc1f90d7e298cb2f2c26d61c3ce16ae1e/Casks/apache-couchdb.rb # v2.3.1
@@ -118,9 +118,22 @@ jobs:
         run: brew install imagemagick;
       - name: Download cozy-stack
         run: go get github.com/cozy/cozy-stack
+      - name: Create cozy-stack storage
+        run: |
+          # Install podman-machine
+          curl -L https://github.com/boot2podman/machine/releases/download/v0.17/podman-machine.darwin-amd64 --output /usr/local/bin/podman-machine
+          chmod +x /usr/local/bin/podman-machine
+          # Install sshfs
+          brew cask install osxfuse
+          curl -L https://github.com/osxfuse/sshfs/releases/download/osxfuse-sshfs-2.5.0/sshfs-2.5.0.pkg --output sshfs-2.5.0.pkg
+          sudo installer -pkg ./sshfs-2.5.0.pkg -target /
+          # Create linux VM and mount storage folder
+          mkdir -p "$COZY_STACK_STORAGE"
+          podman-machine create box
+          podman-machine ssh box -- sudo mkdir /storage
+          podman-machine mount box:/storage $COZY_STACK_STORAGE
       - name: Create a local instance and an OAuth client
         run: |
-          mkdir -p "$COZY_STACK_STORAGE"
           cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
           sleep 8
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
