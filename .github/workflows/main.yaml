@@ -135,15 +135,24 @@ jobs:
       - name: Start cozy-stack server
         run: |
           cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" --log-level warning >cozy-stack.log 2>&1 &
-          sleep 8
       - name: Create a local instance
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          retry_on: error
-          max_attempts: 3
-          retry_wait_seconds: 8
-          command: cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+        id: create-instance
+        continue-on-error: true
+        run: |
+          sleep 8
+          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+      - name: Retry creating local instance
+        id: create-instance-retry1
+        continue-on-error: true
+        if: steps.create-instance.outcome=='failure'
+        run: |
+          sleep 30
+          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
+      - name: Retry creating local instance
+        if: steps.create-instance-retry1.outcome=='failure'
+        run: |
+          sleep 60
+          cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
       - name: Create an OAuth client
         run: |
           COZY_CLIENT_ID=$(cozy-stack instances client-oauth localhost:8080 http://localhost/ test github.com/cozy-labs/cozy-desktop)
