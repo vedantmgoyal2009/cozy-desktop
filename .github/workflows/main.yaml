@@ -11,7 +11,6 @@ env:
   COZY_STACK_STORAGE: "${{ github.workspace }}/storage"
   COZY_URL: "http://localhost:8080"
   COZY_PASSPHRASE: "cozy"
-  COZY_ADMIN_HOST: "127.0.0.1"
   GOPROXY: "https://proxy.golang.org"
   GO111MODULE: "on"
   # FIXME: Homebrew 1.7.3 fails to install cask apache-couchdb
@@ -139,6 +138,7 @@ jobs:
         continue-on-error: true
         run: |
           sleep 8
+          echo "127.0.0.1 localhost cozy.tools" | sudo tee -a /etc/hosts
           cozy-stack instances add --dev --passphrase "$COZY_PASSPHRASE" localhost:8080
       - name: Retry creating local instance
         id: create-instance-retry1
