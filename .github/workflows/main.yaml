@@ -110,14 +110,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.14'
+      - name: Debug with tmate
+        uses: mxschmitt/action-tmate@v3
       - name: Setup CouchDB
-        run: |
-          brew cask install https://raw.githubusercontent.com/Homebrew/homebrew-cask/92914bcfc1f90d7e298cb2f2c26d61c3ce16ae1e/Casks/apache-couchdb.rb # v2.3.1
-          printf "\n[log]\nlevel = warn\n" >> /Applications/Apache\ CouchDB.app/Contents/Resources/couchdbx-core/etc/local.ini;
-          ulimit -S -n 1024;
-          /Applications/Apache\ CouchDB.app/Contents/Resources/couchdbx-core/bin/couchdb >couchdb.log 2>&1 &
-          sleep 8
-          curl -X PUT http://127.0.0.1:5984/{_users,_replicator,_global_changes}
+        run: podman run -d -p 5984:5984 --name couch apache/couchdb:2.3.1
       - name: Install imagemagick
         run: brew install imagemagick;
       - name: Download cozy-stack
@@ -139,8 +135,6 @@ jobs:
       - name: Start cozy-stack server
         run: |
           cozy-stack serve --fs-url "file://$COZY_STACK_STORAGE" >cozy-stack.log 2>&1 &
-          #- name: Debug with tmate
-          #  uses: mxschmitt/action-tmate@v3
       - name: Create local instance and OAuth client
         run: |
           sleep 1
