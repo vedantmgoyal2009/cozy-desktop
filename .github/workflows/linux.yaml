@@ -98,6 +98,10 @@ jobs:
   scenarios:
     runs-on: ubuntu-latest
     name: Scenarios
+    strategy:
+      matrix:
+        stopped_client: [false, true]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -124,6 +128,8 @@ jobs:
       - name: Start Xvfb
         run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
       - name: Scenarios
+        env:
+            STOPPED_CLIENT: ${{ matrix.stopped_client }}
         run: yarn test:scenarios
 
   build:
