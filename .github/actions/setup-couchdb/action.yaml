@@ -17,7 +17,10 @@ runs:
       run: |
         curl -L https://github.com/boot2podman/machine/releases/download/v0.17/podman-machine.darwin-amd64 --output /usr/local/bin/podman-machine
         chmod +x /usr/local/bin/podman-machine
-        podman-machine create --virtualbox-boot2podman-url https://github.com/boot2podman/boot2podman-fedora-iso/releases/download/af598af/boot2podman-fedora.iso box
+        until podman-machine create --virtualbox-boot2podman-url https://github.com/boot2podman/boot2podman-fedora-iso/releases/download/af598af/boot2podman-fedora.iso box
+        do
+          sleep 1
+        end
 
     - name: Setup CouchDB
       shell: bash
