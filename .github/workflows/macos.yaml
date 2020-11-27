@@ -37,6 +37,14 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - name: Setup node
         uses: actions/setup-node@v2-beta
         with:
@@ -60,6 +68,7 @@ jobs:
           hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
           echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
+        if: ${{ ! steps.cache-node-modules.outputs.cache-hit }}
         run: yarn install:all
       - name: Start Xvfb
         run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
@@ -75,6 +84,14 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - name: Setup node
         uses: actions/setup-node@v2-beta
         with:
@@ -98,6 +115,7 @@ jobs:
           hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
           echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
+        if: ${{ ! steps.cache-node-modules.outputs.cache-hit }}
         run: yarn install:all
       - name: Start Xvfb
         run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
@@ -114,6 +132,14 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - name: Setup node
         uses: actions/setup-node@v2-beta
         with:
@@ -137,6 +163,7 @@ jobs:
           hdiutil attach "${COZY_DESKTOP_DIR}.dmg" -mountpoint "$COZY_DESKTOP_DIR"
           echo "NODE_ENV=test" > "${{ github.workspace }}/.env.test"
       - name: Install dependencies
+        if: ${{ ! steps.cache-node-modules.outputs.cache-hit }}
         run: yarn install:all
       - name: Start Xvfb
         run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
@@ -150,12 +177,21 @@ jobs:
     name: Build packages
     steps:
       - uses: actions/checkout@v2
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - name: Setup node
         uses: actions/setup-node@v2-beta
         with:
           node-version: '12.14.1'
           check-latest: true
       - name: Install dependencies
+        if: ${{ ! steps.cache-node-modules.outputs.cache-hit }}
         run: yarn install:all
       - name: Build assets
         run: yarn build
