@@ -157,5 +157,13 @@ jobs:
           check-latest: true
       - name: Install dependencies
         run: yarn install:all
+      - name: Build assets
+        run: yarn build
       - name: Build package
-        run: yarn dist:all
+        uses: ./.github/actions/build-and-publish
+        with:
+          gh-token: "${{ secrets.github_token }}"
+          mac-cert: "${{ secrets.mac_cert }}"
+          mac-cert-password: "${{ secrets.mac_cert_password }}"
+          apple-id: "${{ secrets.apple_id }}"
+          apple-id-password: "${{ secrets.apple_id_password }}"
