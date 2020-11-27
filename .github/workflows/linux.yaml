@@ -100,7 +100,7 @@ jobs:
     name: Scenarios
     strategy:
       matrix:
-        stopped_client: [false, true]
+        stopped_client: ['', 'STOPPED']
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -129,7 +129,7 @@ jobs:
         run: sudo Xvfb :99 -ac -screen 0 1024x768x8 &
       - name: Scenarios
         env:
-            STOPPED_CLIENT: ${{ matrix.stopped_client }}
+            STOPPED_CLIENT: ${{ matrix.stopped_client == 'STOPPED' }}
         run: yarn test:scenarios
 
   build:
