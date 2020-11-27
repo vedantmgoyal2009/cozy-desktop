@@ -20,7 +20,7 @@ runs:
         until podman-machine create --virtualbox-boot2podman-url https://github.com/boot2podman/boot2podman-fedora-iso/releases/download/af598af/boot2podman-fedora.iso box
         do
           sleep 1
-        end
+        done
 
     - name: Setup CouchDB
       shell: bash
