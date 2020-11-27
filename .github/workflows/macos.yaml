@@ -109,10 +109,8 @@ jobs:
     name: Scenarios
     strategy:
       matrix:
+        stopped_client: [false, true]
         fs: ['APFS', 'HFS+']
-        include:
-          fs: 'APFS'
-          stopped_client: true
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
